@@ -30,11 +30,10 @@ public class Program
     {
         public int taskID { get; set; }
         public string taskName { get; set; }
-        public string taskDescription { get; set; }
         public Boolean isCompleted { get; set; }
         public DateTime dueDate { get; set; }
-
-        public string priority { get; set; }
+        public string? priority { get; set; }
+        public string? taskDescription { get; set; }
 
         public UserTask(int id, string name, bool completed, DateTime due, string description = "", string _priority = "Normal")
         {
@@ -60,7 +59,7 @@ public class Program
         {
             userTasks = tasks;
         }
-        
+
 
     }
 
@@ -125,5 +124,50 @@ public class Program
     //private methods for creating, displaying, updating, deleting tasks, etc.
 
     // Create a method to create a new task.
+    public static UserTask CreateTask(int id, string name, bool completed, DateTime due, string priority = "Normal", string description = "")
+    {
+        return new UserTask(id, name, completed, due, priority, description);
+    }
+
+    // Create a method to display task details.
+    public static void DisplayTask(UserTask task)
+    {
+        Console.WriteLine($"TaskID: {task.taskID}, Task: {task.taskName}, Description: {task.taskDescription}, " +
+                          $"Priority: {task.priority}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
+    }
+
+    // Create a method to mark a task as completed.
+    public static void markedAsCompleted(UserTask task, bool isCompleted)
+    {
+        // Logic to mark a task as completed can be implemented here.
+        // This could involve updating the isCompleted property of a UserTask object.
+        task.isCompleted = isCompleted;
+        Console.WriteLine($"Task {task.taskName} marked as completed: {task.isCompleted}");
+    }
+
+    // Create a method to list all tasks.
+    public static void ListAllTasks(List<UserTask> tasks)
+    {
+        Console.WriteLine("Listing all tasks:");
+        foreach (var task in tasks)
+        {
+            DisplayTask(task);
+        }
+    }
+
+    // Create a method to filter tasks by priority.
+    public static List<UserTask> FilterTasksByPriority(List<UserTask> tasks, string priority)
+    {
+        List<UserTask> filteredTasks = new List<UserTask>();
+        foreach (var task in tasks)
+        {
+            if (task.priority != null && task.priority.ToLower() == priority.ToLower())
+            {
+                filteredTasks.Add(task);
+            }
+        }
+        return filteredTasks;
+    }
     
+    // Create a method to sort tasks by due date.
 }
