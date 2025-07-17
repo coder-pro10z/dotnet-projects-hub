@@ -68,7 +68,7 @@ public class Program
                 // For simplicity, we will just prompt the user for task details.
                 Console.Write("Enter task ID: ");
                 int id;
-                while (!int.TryParse(Console.ReadLine(), out id) || id <= 0)
+                while (!int.TryParse(Console.ReadLine(), out id) || id <= 0|| !isUniqueId(taskManager.userTasks, id))
                 {
                     Console.Write("Invalid input. Please enter a valid task ID: ");
                 }
@@ -105,13 +105,21 @@ public class Program
                 // Prompt the user for the task ID to delete.
                 Console.Write("Enter the task ID to delete: ");
                 int id;
-                while (!int.TryParse(Console.ReadLine(), out id) || id <= 0)
+                while (!int.TryParse(Console.ReadLine(), out id) || id <= 0 )
                 {
-                    Console.Write("Invalid input. Please enter a valid task ID: ");
+                    // Check if the task ID is unique.
+                    if (isUniqueId(taskManager.userTasks, id))
+                    {
+                        Console.WriteLine($"Task with ID {id} does not exist.");
+                        continue;
+                    }
+                    {
+                        Console.Write("Invalid input. Please enter a valid task ID: ");
+                    }
+                    // Call the method to delete a task.
+                    DeleteTask(taskManager.userTasks, id);
+                    Console.WriteLine("Deleting a task...");
                 }
-                // Call the method to delete a task.
-                DeleteTask(taskManager.userTasks, id);
-                Console.WriteLine("Deleting a task...");
             }
 
             else if (input?.ToLower() == "mark completed")
@@ -167,8 +175,8 @@ public class Program
                 // Call the method to save tasks to a file.
                 AddTasksToFile(taskManager.userTasks, "TaskStorage\\tasks.csv");
                 Console.WriteLine("Adding tasks to file...");
-            } 
-              else if (input?.ToLower() == "savetaskstofile")
+            }
+            else if (input?.ToLower() == "savetaskstofile")
             {
                 // Call the method to save tasks to a file.
                 AddTasksToFile(taskManager.userTasks, "TaskStorage\\tasks.csv");
@@ -178,8 +186,8 @@ public class Program
             {
                 Console.WriteLine("Unknown command. Please try again.");
             }
-        } while (true);
-    }
+            } while (true) ;
+        }
 
     /// <summary>
     /// 1.create a class UserTask to represent a task in the Task Manager Application.
@@ -397,18 +405,23 @@ public class Program
             // file.WriteLine($"{task.taskID}\t\t|\t{task.taskName}\t|\t{task.taskDescription}\t|\t{task.isCompleted}\t|\t{task.dueDate}\t|\t{task.priority}");
         }
     }
-    
-        public static void AddTasksToFile(List<UserTask> tasks, string filepath)
+
+    public static void AddTasksToFile(List<UserTask> tasks, string filepath)
     {
         using (System.IO.StreamWriter file = new System.IO.StreamWriter(filepath, append: true))
-        {   
-                // TaskID:  Task:  Description " +
-                //$"Priority: {task.priority}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
+        {
+            // TaskID:  Task:  Description " +
+            //$"Priority: {task.priority}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
             file.WriteLine("TaskID,Task,Description,Status,Priority,Status,Due Date");
             // file.WriteLine("TaskID\t|\tTask\t|\tDescription\t|\tStatus\t|\tPriority\t|\tStatus\t|\tDue Date");
             foreach (UserTask task in tasks)
                 file.WriteLine($"{task.taskID},{task.taskName},{task.taskDescription},{task.isCompleted},{task.dueDate},{task.priority}");
-                // file.WriteLine($"{task.taskID}\t\t|\t{task.taskName}\t|\t{task.taskDescription}\t|\t{task.isCompleted}\t|\t{task.dueDate}\t|\t{task.priority}");
-        }   
+            // file.WriteLine($"{task.taskID}\t\t|\t{task.taskName}\t|\t{task.taskDescription}\t|\t{task.isCompleted}\t|\t{task.dueDate}\t|\t{task.priority}");
+        }
+    }
+    public static bool isUniqueId(List<UserTask> tasks, int id)
+    {
+        // Check if the task ID is unique in the list of tasks.
+        return tasks.Any(t => t.taskID == id);
     }
 }
