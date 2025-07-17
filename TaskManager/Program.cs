@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 public class Program
 {
     // public static object TaskManagerApp { get; private set; }
@@ -104,7 +105,7 @@ public class Program
         /// /// and remove the task with the specified ID from the list.
         ///  
         /// </summary>
-        /// 
+    
 
         // Initialize the TaskManager with an empty list of tasks.
         TaskManager taskManager = new TaskManager();
@@ -129,11 +130,26 @@ public class Program
         return new UserTask(id, name, completed, due, priority, description);
     }
 
-    // Create a method to display task details.
+    // Create a method to display task details. 
     public static void DisplayTask(UserTask task)
     {
         Console.WriteLine($"TaskID: {task.taskID}, Task: {task.taskName}, Description: {task.taskDescription}, " +
                           $"Priority: {task.priority}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
+    }
+
+    //Create a method to dealete a task.
+    public static void DeleteTask(List<UserTask> tasks, int taskId)
+    {
+        // Logic to delete a task from the list of tasks.
+        UserTask taskToDelete = tasks.Find(t => t.taskID == taskId)!;
+        if (taskToDelete != null)
+        {
+            Console.WriteLine($"Deleting task: {taskToDelete.taskName}");
+        }
+        else
+        {
+            Console.WriteLine($"Taskwith ID {taskId} not found.");
+        }
     }
 
     // Create a method to mark a task as completed.
@@ -168,6 +184,37 @@ public class Program
         }
         return filteredTasks;
     }
-    
+
+    public static List<UserTask> SortTasksByPriority(List<UserTask> tasks)
+    {
+        // Create a method to sort tasks by priority.
+        // This method should take a list of UserTask objects and return a sorted list based on priority.
+        List<UserTask> sortedTasks = new List<UserTask>(tasks);
+        sortedTasks.Sort((x, y) => string.Compare(x.priority, y.priority, StringComparison.OrdinalIgnoreCase));
+        return sortedTasks;
+    }
+
     // Create a method to sort tasks by due date.
+    public static List<UserTask> sortTaskByDueDate(List<UserTask> tasks)
+    {
+
+        List<UserTask> sortedTasks = new List<UserTask>(tasks);
+        sortedTasks.Sort((x, y) => DateTime.Compare(x.dueDate, y.dueDate));
+        return sortedTasks;
+    }
+
+    public static List<UserTask> filterTasksByCompletionStatus(List<UserTask> tasks, bool isCompleted)
+    {
+        List<UserTask> filteredTasks = new List<UserTask>();
+        foreach (UserTask task in tasks)
+        {
+            if (isCompleted == task.isCompleted)
+
+            {
+                filteredTasks.Add(task);
+            }
+        }
+    return filteredTasks;
+    }
+
 }
