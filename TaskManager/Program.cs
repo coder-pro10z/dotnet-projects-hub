@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
+using System.Linq;
 public class Program
 {
     // public static object TaskManagerApp { get; private set; }
+
+    public static TaskManager taskManager { get;  set; }
 
     /// <summary>
     /// The main entry point for the Task Manager application.  
@@ -13,12 +17,128 @@ public class Program
     {
         // Initialization logic for the Task Manager application can go here.
         // This could include setting up services, loading configurations, etc.
+
+        Console.WriteLine("Initializing Task Manager Application...");
+
+        //create a instance of takmanager class.
+         taskManager = new TaskManager();
+        // You can also initialize the task manager with some predefined tasks if needed.
+        // For example, you could load tasks from a file or database.
+        Console.WriteLine("Task Manager Application initialized successfully.");
     }
 
     public static void Run()
     {
         // Logic to run the Task Manager application can go here.
         // This could include starting the main loop, handling user input, etc.
+
+        Initialize(); // Call the initialization method to set up the application.
+        // For now, we will just print a welcome message.
+        Console.WriteLine("Task Manager Application is running...");
+        //Enter a loop to keep the application running.
+        do
+        {
+            // Here you can implement the logic to handle user commands, display tasks, etc.
+            // For example, you could prompt the user for input and call the appropriate methods.
+            Console.WriteLine("Type 'exit' to quit the application.");
+            Console.WriteLine("Available commands: 'list tasks', 'create task', 'delete task', 'mark completed', 'exit'");
+            Console.Write("Enter command: ");
+            // Read user input and process commands.
+            // For simplicity, we will just read a command and print a message.
+            string input;
+            do
+            {
+                input = Console.ReadLine()!.ToLower();
+            }
+            while (string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input));
+            // Process the input command.
+            if (input?.ToLower() == "exit")
+            {
+                break;
+            }
+            else if (input?.ToLower() == "list tasks")
+            {
+                // Call the method to list all tasks.
+                ListAllTasks(taskManager.userTasks);
+                Console.WriteLine("Listing all tasks...");
+            }
+            else if (input?.ToLower() == "create task")
+            {
+                // Call the method to create a new task.
+                // For simplicity, we will just prompt the user for task details.
+                Console.Write("Enter task ID: ");
+                int id;
+                while (!int.TryParse(Console.ReadLine(), out id) || id <= 0)
+                {
+                    Console.Write("Invalid input. Please enter a valid task ID: ");
+                }
+                Console.Write("Enter task name: ");
+                do
+                {
+                    input = Console.ReadLine()!;
+                } while (string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input));
+                string name = input;
+                Console.Write("Enter task description: ");
+                string description = Console.ReadLine()!;
+                Console.Write("Enter due date (yyyy-mm-dd): ");
+                DateTime dueDate;
+                while (!DateTime.TryParse(Console.ReadLine(), out dueDate))
+                {
+                    Console.Write("Invalid date format. Please enter a valid due date (yyyy-mm-dd): ");
+                }
+                Console.Write("Enter task priority (Normal, High, Low): ");
+                do
+                {
+                    input = Console.ReadLine()!;
+                } while (string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input) || 
+                         (input.ToLower() != "normal" && input.ToLower() != "high" && input.ToLower() != "low"));
+                string priority = input;
+                // Create a new task using the provided details.
+                UserTask newTask = CreateTask(id, name, false, dueDate, priority, description);
+                // Add the new task to the TaskManager's list of tasks.
+                taskManager.userTasks.Add(newTask);
+                // CreateTask(...);
+                Console.WriteLine("Creating a new task...");
+            }
+            else if (input?.ToLower() == "delete task")
+            {
+                // Prompt the user for the task ID to delete.
+                Console.Write("Enter the task ID to delete: ");
+                int id;
+                while (!int.TryParse(Console.ReadLine(), out id) || id <= 0)
+                {
+                    Console.Write("Invalid input. Please enter a valid task ID: ");
+                }
+                // Call the method to delete a task.
+                DeleteTask(taskManager.userTasks,id);
+                Console.WriteLine("Deleting a task...");
+            }
+
+            else if (input?.ToLower() == "mark completed")
+            {
+                // Call the method to mark a task as completed.
+                Console.Write("Enter the task ID to mark as completed: ");
+                int id;
+                while (!int.TryParse(Console.ReadLine(), out id) || id <= 0)
+                {
+                    Console.Write("Invalid input. Please enter a valid task ID: ");
+                }   
+                // Find the task by ID and mark it as completed.
+                UserTask taskToComplete = taskManager.userTasks.Find(t => t.taskID == id)!;
+                if (taskToComplete == null)
+                {
+                    Console.WriteLine($"Task with ID {id} not found.");
+                    continue;
+                }   
+                markedAsCompleted(taskToComplete,isCompleted: true);
+                Console.WriteLine("Marking a task as completed...");
+            }
+
+            else
+            {
+                Console.WriteLine("Unknown command. Please try again.");
+            }
+        } while (true);
     }
 
     /// <summary>
@@ -68,6 +188,7 @@ public class Program
     {
 
         System.Console.WriteLine("Welcome to the Task Manager Application!");
+        Run();
 
         //initialize an variable with data typr Task
         UserTask task1 = new UserTask(1, "Create a console application", false, DateTime.Now.AddDays(1), "Create a dotnet console application for managing tasks", "High");
@@ -148,6 +269,7 @@ public class Program
         UserTask taskToDelete = tasks.Find(t => t.taskID == taskId)!;
         if (taskToDelete != null)
         {
+            tasks.Remove(taskToDelete); 
             Console.WriteLine($"Deleting task: {taskToDelete.taskName}");
         }
         else
