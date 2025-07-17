@@ -7,7 +7,7 @@ public class Program
 {
     // public static object TaskManagerApp { get; private set; }
 
-    public static TaskManager taskManager { get;  set; }
+    public static TaskManager taskManager { get; set; }
 
     /// <summary>
     /// The main entry point for the Task Manager application.  
@@ -21,7 +21,7 @@ public class Program
         Console.WriteLine("Initializing Task Manager Application...");
 
         //create a instance of takmanager class.
-         taskManager = new TaskManager();
+        taskManager = new TaskManager();
         // You can also initialize the task manager with some predefined tasks if needed.
         // For example, you could load tasks from a file or database.
         Console.WriteLine("Task Manager Application initialized successfully.");
@@ -41,7 +41,7 @@ public class Program
             // Here you can implement the logic to handle user commands, display tasks, etc.
             // For example, you could prompt the user for input and call the appropriate methods.
             Console.WriteLine("Type 'exit' to quit the application.");
-            Console.WriteLine("Available commands: 'list tasks', 'create task', 'delete task', 'mark completed', 'exit'");
+            Console.WriteLine("Available commands: 'list tasks', 'create task', 'delete task', 'mark completed', 'filterByPriority', 'sortByPriority', 'sortByDueDate', 'AddTasksToFile','exit'");
             Console.Write("Enter command: ");
             // Read user input and process commands.
             // For simplicity, we will just read a command and print a message.
@@ -90,7 +90,7 @@ public class Program
                 do
                 {
                     input = Console.ReadLine()!;
-                } while (string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input) || 
+                } while (string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input) ||
                          (input.ToLower() != "normal" && input.ToLower() != "high" && input.ToLower() != "low"));
                 string priority = input;
                 // Create a new task using the provided details.
@@ -110,7 +110,7 @@ public class Program
                     Console.Write("Invalid input. Please enter a valid task ID: ");
                 }
                 // Call the method to delete a task.
-                DeleteTask(taskManager.userTasks,id);
+                DeleteTask(taskManager.userTasks, id);
                 Console.WriteLine("Deleting a task...");
             }
 
@@ -122,18 +122,58 @@ public class Program
                 while (!int.TryParse(Console.ReadLine(), out id) || id <= 0)
                 {
                     Console.Write("Invalid input. Please enter a valid task ID: ");
-                }   
+                }
                 // Find the task by ID and mark it as completed.
                 UserTask taskToComplete = taskManager.userTasks.Find(t => t.taskID == id)!;
                 if (taskToComplete == null)
                 {
                     Console.WriteLine($"Task with ID {id} not found.");
                     continue;
-                }   
-                markedAsCompleted(taskToComplete,isCompleted: true);
+                }
+                markedAsCompleted(taskToComplete, isCompleted: true);
                 Console.WriteLine("Marking a task as completed...");
             }
-
+            // 'filterByPriority', 'sortByPriority', 'sortByDueDate', 'AddTasksToFile', 'SaveTasksToFile'
+            else if (input?.ToLower() == "filterbypriority")
+            {
+                // Call the method to filter tasks by priority.
+                Console.Write("Enter priority to filter by (Normal, High, Low): ");
+                do
+                {
+                    input = Console.ReadLine()!;
+                } while (string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input) ||
+                         (input.ToLower() != "normal" && input.ToLower() != "high" && input.ToLower() != "low"));
+                string priority = input;
+                List<UserTask> filteredTasks = FilterTasksByPriority(taskManager.userTasks, priority);
+                Console.WriteLine($"Filtered tasks by priority '{priority}':");
+                ListAllTasks(filteredTasks);
+            }
+            else if (input?.ToLower() == "sortbypriority")
+            {
+                // Call the method to sort tasks by priority.
+                List<UserTask> sortedTasks = SortTasksByPriority(taskManager.userTasks);
+                Console.WriteLine("Sorted tasks by priority:");
+                ListAllTasks(sortedTasks);
+            }
+            else if (input?.ToLower() == "sortbyduedate")
+            {
+                // Call the method to sort tasks by due date.
+                List<UserTask> sortedTasks = sortTaskByDueDate(taskManager.userTasks);
+                Console.WriteLine("Sorted tasks by due date:");
+                ListAllTasks(sortedTasks);
+            }
+            else if (input?.ToLower() == "addtaskstofile")
+            {
+                // Call the method to save tasks to a file.
+                AddTasksToFile(taskManager.userTasks, "TaskStorage\\tasks.csv");
+                Console.WriteLine("Adding tasks to file...");
+            } 
+              else if (input?.ToLower() == "savetaskstofile")
+            {
+                // Call the method to save tasks to a file.
+                AddTasksToFile(taskManager.userTasks, "TaskStorage\\tasks.csv");
+                Console.WriteLine("Saving tasks to file...");
+            }
             else
             {
                 Console.WriteLine("Unknown command. Please try again.");
@@ -269,7 +309,7 @@ public class Program
         UserTask taskToDelete = tasks.Find(t => t.taskID == taskId)!;
         if (taskToDelete != null)
         {
-            tasks.Remove(taskToDelete); 
+            tasks.Remove(taskToDelete);
             Console.WriteLine($"Deleting task: {taskToDelete.taskName}");
         }
         else
@@ -348,16 +388,27 @@ public class Program
     {
         using (System.IO.StreamWriter file = new System.IO.StreamWriter(filepath))
         {
+            // TaskID:  Task:  Description " +
+            //$"Priority: {task.priority}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
+            file.WriteLine("TaskID,Task,Description,Status,Priority,Status,Due Date");
+            // file.WriteLine("TaskID\t|\tTask\t|\tDescription\t|\tStatus\t|\tPriority\t|\tStatus\t|\tDue Date");
+            foreach (UserTask task in tasks)
+                file.WriteLine($"{task.taskID},{task.taskName},{task.taskDescription},{task.isCompleted},{task.dueDate},{task.priority}");
+            // file.WriteLine($"{task.taskID}\t\t|\t{task.taskName}\t|\t{task.taskDescription}\t|\t{task.isCompleted}\t|\t{task.dueDate}\t|\t{task.priority}");
+        }
+    }
+    
+        public static void AddTasksToFile(List<UserTask> tasks, string filepath)
+    {
+        using (System.IO.StreamWriter file = new System.IO.StreamWriter(filepath, append: true))
+        {   
                 // TaskID:  Task:  Description " +
-                //                $"Priority: {task.priority}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
+                //$"Priority: {task.priority}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
             file.WriteLine("TaskID,Task,Description,Status,Priority,Status,Due Date");
             // file.WriteLine("TaskID\t|\tTask\t|\tDescription\t|\tStatus\t|\tPriority\t|\tStatus\t|\tDue Date");
             foreach (UserTask task in tasks)
                 file.WriteLine($"{task.taskID},{task.taskName},{task.taskDescription},{task.isCompleted},{task.dueDate},{task.priority}");
                 // file.WriteLine($"{task.taskID}\t\t|\t{task.taskName}\t|\t{task.taskDescription}\t|\t{task.isCompleted}\t|\t{task.dueDate}\t|\t{task.priority}");
-            {
-            }
-        }
-
+        }   
     }
 }
