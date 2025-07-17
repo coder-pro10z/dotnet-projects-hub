@@ -105,18 +105,22 @@ public class Program
         /// /// and remove the task with the specified ID from the list.
         ///  
         /// </summary>
-    
+
 
         // Initialize the TaskManager with an empty list of tasks.
         TaskManager taskManager = new TaskManager();
 
         // Add the created task to the TaskManager's list of tasks.
         taskManager.userTasks.Add(task1);
-        foreach (UserTask task in taskManager.userTasks)
-        {
-            Console.WriteLine($"TaskID: {task.taskID}, Task: {task.taskName}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
+        // foreach (UserTask task in taskManager.userTasks)
+        // {
+        //     Console.WriteLine($"TaskID: {task.taskID}, Task: {task.taskName}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
+        // }
 
-        }
+        // Display the details of the created task.
+        DisplayTask(task1);
+
+        SaveTasksToFile(taskManager.userTasks, "TaskStorage\\tasks.csv");
         Console.WriteLine("Press any key to exit...");
     }
 
@@ -214,7 +218,24 @@ public class Program
                 filteredTasks.Add(task);
             }
         }
-    return filteredTasks;
+        return filteredTasks;
     }
 
+    //Create a method to save tasks to a file 
+    public static void SaveTasksToFile(List<UserTask> tasks, string filepath)
+    {
+        using (System.IO.StreamWriter file = new System.IO.StreamWriter(filepath))
+        {
+                // TaskID:  Task:  Description " +
+                //                $"Priority: {task.priority}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
+            file.WriteLine("TaskID,Task,Description,Status,Priority,Status,Due Date");
+            // file.WriteLine("TaskID\t|\tTask\t|\tDescription\t|\tStatus\t|\tPriority\t|\tStatus\t|\tDue Date");
+            foreach (UserTask task in tasks)
+                file.WriteLine($"{task.taskID},{task.taskName},{task.taskDescription},{task.isCompleted},{task.dueDate},{task.priority}");
+                // file.WriteLine($"{task.taskID}\t\t|\t{task.taskName}\t|\t{task.taskDescription}\t|\t{task.isCompleted}\t|\t{task.dueDate}\t|\t{task.priority}");
+            {
+            }
+        }
+
+    }
 }
