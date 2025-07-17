@@ -68,7 +68,8 @@ public class Program
                 // For simplicity, we will just prompt the user for task details.
                 Console.Write("Enter task ID: ");
                 int id;
-                while (!int.TryParse(Console.ReadLine(), out id) || id <= 0|| !isUniqueId(taskManager.userTasks, id))
+                while (!int.TryParse(Console.ReadLine(), out id) || id <= 0 ||
+                 (isUniqueId(taskManager.userTasks, id)))
                 {
                     Console.Write("Invalid input. Please enter a valid task ID: ");
                 }
@@ -94,7 +95,7 @@ public class Program
                          (input.ToLower() != "normal" && input.ToLower() != "high" && input.ToLower() != "low"));
                 string priority = input;
                 // Create a new task using the provided details.
-                UserTask newTask = CreateTask(id, name, false, dueDate, priority, description);
+                UserTask newTask = CreateTask(id, name, false, dueDate,  description,priority);
                 // Add the new task to the TaskManager's list of tasks.
                 taskManager.userTasks.Add(newTask);
                 // CreateTask(...);
@@ -186,8 +187,8 @@ public class Program
             {
                 Console.WriteLine("Unknown command. Please try again.");
             }
-            } while (true) ;
-        }
+        } while (true) ;
+    }
 
     /// <summary>
     /// 1.create a class UserTask to represent a task in the Task Manager Application.
@@ -201,16 +202,16 @@ public class Program
         public string taskName { get; set; }
         public Boolean isCompleted { get; set; }
         public DateTime dueDate { get; set; }
-        public string? priority { get; set; }
         public string? taskDescription { get; set; }
+        public string? priority { get; set; }
 
         public UserTask(int id, string name, bool completed, DateTime due, string description = "", string _priority = "Normal")
         {
             taskID = id;
             taskName = name;
-            taskDescription = description;
             isCompleted = completed;
             dueDate = due;
+            taskDescription = description;
             priority = _priority;
         }
     }
@@ -241,12 +242,12 @@ public class Program
         //initialize an variable with data typr Task
         UserTask task1 = new UserTask(1, "Create a console application", false, DateTime.Now.AddDays(1), "Create a dotnet console application for managing tasks", "High");
 
-        Console.WriteLine($"TaskID:\t\t{task1.taskID}\n" +
-                            $"Task:\t\t{task1.taskName}\n" +
-                            $"Description:\t{task1.taskDescription}\n" +
-                            $"Priority:\t{task1.priority}\n" +
-                            $"Status:\t\t{task1.isCompleted}\n" +
-                            $"Due Date:\t{task1.dueDate}\n");
+        //  Console.WriteLine($"TaskID:\t\t{task1.taskID}\n" +
+        //                     $"Task:\t\t{task1.taskName}\n" +
+        //                     $"Description:\t{task1.taskDescription}\n" +
+        //                     $"Priority:\t{task1.priority}\n" +
+        //                     $"Status:\t\t{task1.isCompleted}\n" +
+        //                     $"Due Date:\t{task1.dueDate}\n");
         // Console.WriteLine($"TaskID :{task1.taskID} {} {} {} {} {}");
 
         ///
@@ -277,19 +278,19 @@ public class Program
 
 
         // Initialize the TaskManager with an empty list of tasks.
-        TaskManager taskManager = new TaskManager();
+        // TaskManager taskManager = new TaskManager();
 
         // Add the created task to the TaskManager's list of tasks.
-        taskManager.userTasks.Add(task1);
+        // taskManager.userTasks.Add(task1);
         // foreach (UserTask task in taskManager.userTasks)
         // {
         //     Console.WriteLine($"TaskID: {task.taskID}, Task: {task.taskName}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
         // }
 
         // Display the details of the created task.
-        DisplayTask(task1);
+        // DisplayTask(task1);
 
-        SaveTasksToFile(taskManager.userTasks, "TaskStorage\\tasks.csv");
+        // SaveTasksToFile(taskManager.userTasks, "TaskStorage\\tasks.csv");
         Console.WriteLine("Press any key to exit...");
     }
 
@@ -298,9 +299,9 @@ public class Program
     //private methods for creating, displaying, updating, deleting tasks, etc.
 
     // Create a method to create a new task.
-    public static UserTask CreateTask(int id, string name, bool completed, DateTime due, string priority = "Normal", string description = "")
+    public static UserTask CreateTask(int id, string name, bool completed, DateTime due,string description = "", string priority = "Normal")
     {
-        return new UserTask(id, name, completed, due, priority, description);
+        return new UserTask(id, name, completed, due, description, priority);
     }
 
     // Create a method to display task details. 
@@ -392,27 +393,47 @@ public class Program
     }
 
     //Create a method to save tasks to a file 
-    public static void SaveTasksToFile(List<UserTask> tasks, string filepath)
+    public static void SaveTasksToFile(List<UserTask> tasks, string filePath)
     {
-        using (System.IO.StreamWriter file = new System.IO.StreamWriter(filepath))
+                // Get the directory from the file path
+        string directoryPath = Path.GetDirectoryName(filePath);
+
+        // Ensure directory exists
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+            Console.WriteLine($"Directory created: {directoryPath}");
+        }
+
+        using (System.IO.StreamWriter file = new System.IO.StreamWriter(filePath))
         {
             // TaskID:  Task:  Description " +
             //$"Priority: {task.priority}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
-            file.WriteLine("TaskID,Task,Description,Status,Priority,Status,Due Date");
+            file.WriteLine("TaskID,Task,Description,Status,Due Date,Priority");
             // file.WriteLine("TaskID\t|\tTask\t|\tDescription\t|\tStatus\t|\tPriority\t|\tStatus\t|\tDue Date");
             foreach (UserTask task in tasks)
                 file.WriteLine($"{task.taskID},{task.taskName},{task.taskDescription},{task.isCompleted},{task.dueDate},{task.priority}");
             // file.WriteLine($"{task.taskID}\t\t|\t{task.taskName}\t|\t{task.taskDescription}\t|\t{task.isCompleted}\t|\t{task.dueDate}\t|\t{task.priority}");
         }
     }
-
-    public static void AddTasksToFile(List<UserTask> tasks, string filepath)
+    // Create a method to add tasks to a file.
+    public static void AddTasksToFile(List<UserTask> tasks, string filePath)
     {
-        using (System.IO.StreamWriter file = new System.IO.StreamWriter(filepath, append: true))
+                // Get the directory from the file path
+        string directoryPath = Path.GetDirectoryName(filePath);
+
+        // Ensure directory exists
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+            Console.WriteLine($"Directory created: {directoryPath}");
+        }
+
+        using (System.IO.StreamWriter file = new System.IO.StreamWriter(filePath, append: true))
         {
             // TaskID:  Task:  Description " +
             //$"Priority: {task.priority}, Status: {task.isCompleted}, Due Date: {task.dueDate}");
-            file.WriteLine("TaskID,Task,Description,Status,Priority,Status,Due Date");
+            // file.WriteLine("TaskID,Task,Description,Status,Due Date,Priority");
             // file.WriteLine("TaskID\t|\tTask\t|\tDescription\t|\tStatus\t|\tPriority\t|\tStatus\t|\tDue Date");
             foreach (UserTask task in tasks)
                 file.WriteLine($"{task.taskID},{task.taskName},{task.taskDescription},{task.isCompleted},{task.dueDate},{task.priority}");
