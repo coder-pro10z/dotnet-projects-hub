@@ -186,3 +186,4 @@ The matrix shows how each project builds specific competencies while gradually i
 
 ---
 SkillSync
+AZURE OPENAI
